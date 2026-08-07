@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CleanCity SPS | Transformando San Pedro Sula</title>
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .glass-nav {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .hero-gradient {
+      background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, rgba(2, 6, 23, 0) 70%);
+    }
+    .feature-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      background: rgba(30, 41, 59, 0.6);
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-5px);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased bg-slate-950 text-slate-100 overflow-x-hidden">
+
+  <!-- Navigation -->
+  <nav class="glass-nav fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/30 text-white font-extrabold text-xl">
+        ♻️
+      </div>
+      <span class="text-xl font-black tracking-tight">CleanCity <span class="text-brand-400">SPS</span></span>
+    </div>
+    
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+      <a href="#servicios" class="hover:text-brand-400 transition">Servicios</a>
+      <a href="#impacto" class="hover:text-brand-400 transition">Impacto</a>
+      <a href="#nosotros" class="hover:text-brand-400 transition">Nosotros</a>
+      <a href="login.html" class="bg-brand-600 hover:bg-brand-500 text-white px-5 py-2 rounded-full transition shadow-lg shadow-brand-600/20 font-bold">
+        Acceder al Sistema
+      </a>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <div class="md:hidden text-2xl text-slate-300">
+      <i class="fa-solid fa-bars"></i>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20 overflow-hidden hero-gradient">
+    <!-- Decorative Elements -->
+    <div class="absolute top-1/4 -left-20 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 3s;"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto animate-fade-in-up">
+      <span class="inline-block px-4 py-1.5 mb-6 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-widest">
+        Sostenibilidad Urbana 2026
+      </span>
+      <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-6">
+        Hacia una San Pedro Sula <br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-teal-300">Limpia y Sostenible</span>
+      </h1>
+      <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+        Implementamos tecnología de monitoreo en tiempo real y gestión inteligente de residuos para mejorar la calidad de vida de cada vecino de SPS.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="login.html" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 group active:scale-95">
+          Unirse a la Ciudadanía
+          <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        <a href="#servicios" class="w-full sm:w-auto bg-slate-800/50 hover:bg-slate-800 text-slate-200 px-8 py-4 rounded-2xl font-bold text-lg transition-all border border-slate-700 backdrop-blur-sm">
+          Saber más
+        </a>
+      </div>
+    </div>
+
+    <!-- Floating Image/Visual placeholder -->
+    <div class="relative z-10 mt-20 w-full max-w-5xl mx-auto animate-float opacity-80">
+      <div class="aspect-video rounded-3xl border border-slate-800 bg-slate-900/50 backdrop-blur-xl shadow-2xl overflow-hidden relative">
+         <!-- Mockup of the App Dashboard -->
+         <div class="absolute inset-0 flex items-center justify-center text-slate-700">
+            <i class="fa-solid fa-map-location-dot text-8xl opacity-20"></i>
+         </div>
+         <div class="absolute top-0 left-0 w-full h-12 bg-slate-900/80 border-b border-slate-800 flex items-center px-4 gap-2">
+            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+            <div class="ml-4 text-[10px] text-slate-500 font-mono uppercase">SPS Live Monitoring System</div>
+         </div>
+         <div class="absolute bottom-8 left-8 right-8 h-32 bg-slate-800/40 rounded-2xl border border-slate-700 p-4 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
+            <div class="flex-1">
+                <div class="h-2 w-32 bg-slate-700 rounded-full mb-2"></div>
+                <div class="h-2 w-24 bg-slate-800 rounded-full"></div>
+            </div>
+         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="servicios" class="py-24 px-6 relative z-10">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-black text-white mb-4">Tecnología al servicio de la ciudad</h2>
+        <p class="text-slate-400 max-w-2xl mx-auto">Un ecosistema digital diseñado para optimizar la recolección y fomentar la cultura del reciclaje en San Pedro Sula.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="feature-card p-8 rounded-3xl text-left">
+          <div class="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-xl mb-6">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Rastreo en Tiempo Real</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Consulta la ubicación exacta de los camiones recolectores y recibe notificaciones cuando estén cerca de tu hogar.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card p-8 rounded-3xl text-left">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl mb-6">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Reportes Instantáneos</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Denuncia la acumulación de desechos en cualquier punto de la ciudad mediante geolocalización y fotografía.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card p-8 rounded-3xl text-left">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-6">
+            <i class="fa-solid fa-recycle"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Gestión de Reciclaje</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Accede a calendarios específicos de recolección de plásticos y cartón para reducir la huella ambiental.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Impact CTA -->
+  <section id="impacto" class="py-20 px-6 relative z-10">
+    <div class="max-w-5xl mx-auto bg-gradient-to-br from-brand-600 to-teal-700 rounded-3xl p-8 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-brand-600/20">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+      
+      <div class="relative z-10">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-6">Únete al cambio urbano</h2>
+        <p class="text-brand-50 text-lg mb-10 max-w-2xl mx-auto opacity-90">
+          Estamos construyendo la ciudad más inteligente y limpia de Honduras. Tu participación es la pieza fundamental para lograrlo.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="login.html" class="bg-white text-brand-700 hover:bg-slate-100 px-8 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 active:scale-95">
+            Crear mi cuenta
+            <i class="fa-solid fa-user-plus"></i>
+          </a>
+          <a href="#" class="bg-brand-700/50 hover:bg-brand-800 text-white border border-white/20 px-8 py-4 rounded-2xl font-bold text-lg transition-all backdrop-blur-sm">
+            Ver estadísticas
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 border-t border-slate-900 relative z-10">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold">♻️</div>
+        <span class="text-lg font-bold tracking-tight text-white">CleanCity <span class="text-brand-400">SPS</span></span>
+      </div>
+      
+      <div class="flex gap-6 text-slate-500 text-sm">
+        <a href="#" class="hover:text-slate-300 transition">Términos</a>
+        <a href="#" class="hover:text-slate-300 transition">Privacidad</a>
+        <a href="#" class="hover:text-slate-300 transition">Contacto</a>
+      </div>
+      
+      <div class="text-slate-500 text-xs font-medium">
+        © 2026 CleanCity SPS. San Pedro Sula, Honduras.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

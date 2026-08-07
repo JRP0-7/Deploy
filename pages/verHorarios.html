@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horarios de Recolección — CleanCity SPS</title>
+  <script src="../js/authGuard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, gov: { 900: '#090d16', gold: '#fbbf24' } } } } }
+  </script>
+  <script src="../js/api.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+  <header class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="../index.html" class="font-black text-white">CleanCity <span class="text-brand-400">SPS</span></a>
+      <nav class="flex items-center gap-4 text-xs font-semibold uppercase text-slate-300">
+        <a href="calendarioRutas.html" class="hover:text-brand-400">Calendario</a>
+        <a href="verHorarios.html" class="text-brand-400">Horarios</a>
+        <a href="crearDenuncia.html" class="hover:text-brand-400">Denunciar</a>
+        <a href="consultarDenuncias.html" class="hover:text-brand-400">Mis denuncias</a>
+        <a href="mapaRutas.html" class="hover:text-brand-400">Mapa</a>
+        <button onclick="cerrarSesion(); window.location.href='../login.html';" class="text-red-300 hover:text-red-200">Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-black text-white mb-1">Horario de tu colonia</h1>
+    <p class="text-sm text-slate-400 mb-6">Detalle del servicio de recolección.</p>
+
+    <div id="estadoCarga" class="text-sm text-slate-400">Cargando...</div>
+    <ul id="listaHorario" class="hidden divide-y divide-slate-800 glass-card rounded-xl border border-slate-800 overflow-hidden"></ul>
+    <div id="estadoError" class="hidden text-sm text-red-300"></div>
+  </main>
+
+  <script>
+    const NOMBRES_DIAS_LARGO = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    async function iniciar() {
+      const usuario = obtenerUsuario();
+      if (!usuario || !usuario.coloniaId) {
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('estadoError').textContent = 'No tenés colonia asignada en tu cuenta.';
+        document.getElementById('estadoError').classList.remove('hidden');
+        return;
+      }
+      try {
+        const calendario = await obtenerCalendario(usuario.coloniaId);
+        document.getElementById('estadoCarga').classList.add('hidden');
+        const lista = document.getElementById('listaHorario');
+        lista.classList.remove('hidden');
+        lista.innerHTML = calendario.diasProgramados.map((dia) => `
+          <li class="flex items-center justify-between px-4 py-3 text-sm">
+            <span class="font-semibold text-white">${NOMBRES_DIAS_LARGO[dia]}</span>
+            <span class="text-slate-400">${calendario.ventanaInicio} — ${calendario.ventanaFin}</span>
+          </li>
+        `).join('');
+      } catch (err) {
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('estadoError').textContent = err.message;
+        document.getElementById('estadoError').classList.remove('hidden');
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

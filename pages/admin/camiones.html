@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flota de Camiones — CleanCity SPS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/Style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            gov: { 900: '#090d16' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="../../js/api.js"></script>
+  <script src="../../js/adminGuard.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden">
+
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 glass-nav flex-col z-40 border-r border-slate-800/60">
+    <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800/60">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-lg shadow-lg shadow-brand-500/25">♻️</div>
+      <div>
+        <div class="font-black tracking-tight text-sm">CleanCity <span class="text-brand-400">SPS</span></div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Panel Operativo</div>
+      </div>
+    </div>
+
+    <nav class="flex-1 py-6 px-4 space-y-1 text-xs font-semibold">
+      <a href="resumen.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-gauge-high w-4 text-center text-brand-400"></i> Resumen Operativo
+      </a>
+      <a href="cobertura.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-map-location-dot w-4 text-center text-cyan-400"></i> Cobertura del Día
+      </a>
+      <a href="camiones.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 border border-brand-500/25 text-brand-400">
+        <i class="fa-solid fa-truck-fast w-4 text-center"></i> Flota de Camiones
+      </a>
+      <a href="denuncias.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-inbox w-4 text-center text-rose-400"></i> Bandeja de Reportes
+      </a>
+    </nav>
+
+    <div class="px-4 pb-6 space-y-2 border-t border-slate-800/60 pt-4">
+      <a href="../../index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+        <i class="fa-solid fa-globe w-4 text-center"></i> Portal Ciudadano
+      </a>
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-rose-300 text-xs font-semibold transition">
+        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="lg:pl-64">
+    <div class="glass-nav h-20 px-4 sm:px-6 flex items-center justify-between border-b border-slate-800/60">
+      <div class="flex items-center gap-3">
+        <div class="lg:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center">♻️</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black text-white">Flota de Camiones</h1>
+          <p class="text-[11px] text-slate-400" id="fechaHoy"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="cargarFlota()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-brand-400 transition" title="Refrescar">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+        <button onclick="logout()" class="lg:hidden w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-300 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="lg:pl-64">
+    <div class="p-4 sm:p-6 space-y-6">
+
+      <div id="demoBanner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs rounded-2xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Modo demostración: no se pudieron cargar camiones del backend, se muestran datos de ejemplo.</span>
+      </div>
+
+      <!-- Resumen de flota -->
+      <section class="grid grid-cols-3 gap-4">
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 text-center">
+          <div class="text-3xl font-black text-emerald-400" id="stActivos">—</div>
+          <div class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mt-1 flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Activos
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 text-center">
+          <div class="text-3xl font-black text-amber-400" id="stPausa">—</div>
+          <div class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mt-1 flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>En pausa
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-800 text-center">
+          <div class="text-3xl font-black text-rose-400" id="stIncidente">—</div>
+          <div class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mt-1 flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>Con incidente
+          </div>
+        </div>
+      </section>
+
+      <!-- Tarjetas de camiones -->
+      <section id="camionesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="text-xs text-slate-500 animate-pulse">Cargando flota...</div>
+      </section>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    const ESTADO_TRUCK = {
+      activo:        { label: 'Activo',       cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', dot: 'bg-emerald-400', icon: 'fa-truck-pickup' },
+      en_pausa:      { label: 'En pausa',     cls: 'bg-amber-500/20 text-amber-300 border-amber-500/30',     dot: 'bg-amber-400',   icon: 'fa-pause' },
+      con_incidente: { label: 'Con incidente',cls: 'bg-rose-500/20 text-rose-300 border-rose-500/30',         dot: 'bg-rose-500',    icon: 'fa-triangle-exclamation' }
+    };
+
+    const DEMO_CAMIONES = [
+      { id: 'CC-001', placa: 'PCH-2841', estado: 'activo', ruta: 'Rivera Hernández', conductor: 'Carlos Mejía', horaInicio: '06:00', nota: 'En ruta normal' },
+      { id: 'CC-002', placa: 'PCH-7612', estado: 'en_pausa', ruta: 'La Pradera', conductor: 'Rosa Cálix', horaInicio: '08:30', nota: 'Pausa programada' },
+      { id: 'CC-003', placa: 'PCH-1190', estado: 'con_incidente', ruta: 'Guamilito', conductor: 'Luis Paz', horaInicio: '10:00', nota: 'Llanta ponchada' },
+      { id: 'CC-004', placa: 'PCH-5520', estado: 'activo', ruta: 'Colonia Satélite', conductor: 'María Ferrera', horaInicio: '07:00', nota: 'En ruta normal' }
+    ];
+
+    let camiones = [];
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-slate-800';
+      toast.className = `${bgColor} border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function logout() {
+      cerrarSesion();
+      location.href = 'login.html';
+    }
+
+    function render() {
+      const activos = camiones.filter(t => t.estado === 'activo').length;
+      const pausa = camiones.filter(t => t.estado === 'en_pausa').length;
+      const incidente = camiones.filter(t => t.estado === 'con_incidente').length;
+
+      document.getElementById('stActivos').textContent = activos;
+      document.getElementById('stPausa').textContent = pausa;
+      document.getElementById('stIncidente').textContent = incidente;
+
+      const container = document.getElementById('camionesList');
+      container.innerHTML = camiones.map(t => {
+        const st = ESTADO_TRUCK[t.estado] || ESTADO_TRUCK.en_pausa;
+        return `
+          <div class="glass-card glass-card-hover rounded-2xl p-5 border border-slate-800">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl ${st.cls} border flex items-center justify-center text-base"><i class="fa-solid ${st.icon}"></i></div>
+                <div>
+                  <div class="text-sm font-black text-white font-mono">${t.placa}</div>
+                  <div class="text-[11px] text-slate-500">${t.ruta}</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full ${st.cls} text-[10px] font-bold border flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full ${st.dot}"></span>${st.label}
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 border-t border-slate-800 pt-3">
+              <div><span class="text-slate-600">Unidad:</span> <span class="font-mono">${t.id}</span></div>
+              <div><span class="text-slate-600">Inicio:</span> ${t.horaInicio || '—'}</div>
+              <div class="col-span-2"><span class="text-slate-600">Conductor:</span> ${t.conductor || '—'}</div>
+              <div class="col-span-2"><span class="text-slate-600">Nota:</span> ${t.nota || '—'}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function cargarFlota() {
+      document.getElementById('camionesList').innerHTML = '<div class="text-xs text-slate-500 animate-pulse">Cargando flota...</div>';
+      try {
+        const data = await apiGet('/api/camiones');
+        if (data && data.length) {
+          camiones = data;
+        } else {
+          throw new Error('vacío');
+        }
+      } catch (e) {
+        document.getElementById('demoBanner').classList.remove('hidden');
+        camiones = DEMO_CAMIONES;
+      }
+      render();
+    }
+
+    async function init() {
+      document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-HN', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      await cargarFlota();
+    }
+
+    init();
+  </script>
+</body>
+</html>

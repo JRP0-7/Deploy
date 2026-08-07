@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa de Colonias — CleanCity SPS</title>
+  <script src="../js/authGuard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, gov: { 900: '#090d16', gold: '#fbbf24' } } } } }
+  </script>
+  <script src="../js/api.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+  <header class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="../index.html" class="font-black text-white">CleanCity <span class="text-brand-400">SPS</span></a>
+      <nav class="flex items-center gap-4 text-xs font-semibold uppercase text-slate-300">
+        <a href="calendarioRutas.html" class="hover:text-brand-400">Calendario</a>
+        <a href="verHorarios.html" class="hover:text-brand-400">Horarios</a>
+        <a href="crearDenuncia.html" class="hover:text-brand-400">Denunciar</a>
+        <a href="consultarDenuncias.html" class="hover:text-brand-400">Mis denuncias</a>
+        <a href="mapaRutas.html" class="text-brand-400">Mapa</a>
+        <button onclick="cerrarSesion(); window.location.href='../login.html';" class="text-red-300 hover:text-red-200">Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-black text-white mb-1">Mapa de colonias</h1>
+    <p class="text-sm text-slate-400 mb-6">Colonias registradas de San Pedro Sula.</p>
+    <div id="mapa" class="w-full h-[500px] rounded-2xl border border-slate-800 overflow-hidden"></div>
+    <div id="estadoError" class="hidden mt-4 text-sm text-red-300"></div>
+  </main>
+
+  <script>
+    async function iniciar() {
+      const mapa = L.map('mapa').setView([15.5026, -88.0253], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapa);
+
+      try {
+        const colonias = await listarColonias();
+        colonias
+          .filter((c) => c.lat && c.lon)
+          .forEach((c) => {
+            L.marker([c.lat, c.lon]).addTo(mapa).bindPopup(`<b>${c.nombre}</b>`);
+          });
+      } catch (err) {
+        document.getElementById('estadoError').textContent = err.message;
+        document.getElementById('estadoError').classList.remove('hidden');
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

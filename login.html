@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full scroll-smooth bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión — CleanCity SPS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="/Ventd-frontend/css/style.css">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: {
+          brand: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+          gov: { 900: '#090d16', gold: '#fbbf24' }
+        }
+      } }
+    }
+  </script>
+  <script src="js/api.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased flex items-center justify-center px-4">
+
+  <div class="w-full max-w-md glass-card rounded-2xl border border-slate-800 p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/25">
+        <span class="text-2xl">♻️</span>
+      </div>
+      <div>
+        <div class="text-xl font-black tracking-tight text-white">CleanCity <span class="text-brand-400">SPS</span></div>
+        <p class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Acceso vecinal</p>
+      </div>
+    </div>
+
+    <div class="flex mb-6 bg-slate-900 rounded-xl p-1 border border-slate-800">
+      <button id="tabLogin" onclick="mostrarFormulario('login')" class="flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition bg-brand-600 text-white">Iniciar sesión</button>
+      <button id="tabRegistro" onclick="mostrarFormulario('registro')" class="flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition text-slate-300">Registrarme</button>
+    </div>
+
+    <div id="mensajeError" class="hidden mb-4 text-xs text-red-300 bg-red-950/50 border border-red-800 rounded-lg px-3 py-2"></div>
+    <div id="mensajeExito" class="hidden mb-4 text-xs text-brand-200 bg-brand-950/50 border border-brand-700 rounded-lg px-3 py-2"></div>
+
+    <form id="formLogin" onsubmit="manejarLogin(event)" class="space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">ID de usuario</label>
+        <input id="loginId" type="text" placeholder="VCN-00001" required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Contraseña</label>
+        <input id="loginPassword" type="password" required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500" />
+      </div>
+      <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl text-sm transition">Entrar</button>
+      <p class="text-[10px] text-slate-500 text-center">Demo: VCN-00001 / admin123 (rol admin)</p>
+    </form>
+
+    <form id="formRegistro" onsubmit="manejarRegistro(event)" class="space-y-4 hidden">
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Teléfono</label>
+        <input id="registroTelefono" type="tel" placeholder="99990000" pattern="\d{8,15}" required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Correo</label>
+        <input id="registroCorreo" type="mail" placeholder="mail.@mail.com"  required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Contraseña</label>
+        <input id="registroPassword" type="password" minlength="4" required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500" />
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-300 uppercase tracking-wide">Colonia</label>
+        <select id="registroColonia" required
+          class="mt-1 w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500">
+          <option value="">Cargando colonias...</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 rounded-xl text-sm transition">Crear cuenta</button>
+    </form>
+
+    <a href="index.html" class="block text-center text-xs text-slate-400 hover:text-brand-400 mt-6">← Volver al inicio</a>
+  </div>
+
+  <script>
+    function mostrarFormulario(cual) {
+      const esLogin = cual === 'login';
+      document.getElementById('formLogin').classList.toggle('hidden', !esLogin);
+      document.getElementById('formRegistro').classList.toggle('hidden', esLogin);
+      document.getElementById('tabLogin').classList.toggle('bg-brand-600', esLogin);
+      document.getElementById('tabLogin').classList.toggle('text-white', esLogin);
+      document.getElementById('tabLogin').classList.toggle('text-slate-300', !esLogin);
+      document.getElementById('tabRegistro').classList.toggle('bg-brand-600', !esLogin);
+      document.getElementById('tabRegistro').classList.toggle('text-white', !esLogin);
+      document.getElementById('tabRegistro').classList.toggle('text-slate-300', esLogin);
+      ocultarMensajes();
+    }
+
+    function ocultarMensajes() {
+      document.getElementById('mensajeError').classList.add('hidden');
+      document.getElementById('mensajeExito').classList.add('hidden');
+    }
+
+    function mostrarError(texto) {
+      const el = document.getElementById('mensajeError');
+      el.textContent = texto;
+      el.classList.remove('hidden');
+    }
+
+    function mostrarExito(texto) {
+      const el = document.getElementById('mensajeExito');
+      el.textContent = texto;
+      el.classList.remove('hidden');
+    }
+
+    async function cargarColonias() {
+      const select = document.getElementById('registroColonia');
+      try {
+        const colonias = await listarColonias();
+        select.innerHTML = '<option value="">Selecciona tu colonia</option>' +
+          colonias.map((c) => `<option value="${c.id}">${c.nombre}</option>`).join('');
+      } catch (err) {
+        select.innerHTML = '<option value="">No se pudieron cargar las colonias</option>';
+      }
+    }
+
+    async function manejarLogin(evento) {
+      evento.preventDefault();
+      ocultarMensajes();
+      try {
+        const id = document.getElementById('loginId').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const resultado = await iniciarSesion({ id, password });
+        guardarSesion(resultado);
+        window.location.href = 'pages/calendarioRutas.html';
+      } catch (err) {
+        mostrarError(err.message);
+      }
+    }
+
+    async function manejarRegistro(evento) {
+      evento.preventDefault();
+      ocultarMensajes();
+      try {
+        const telefono = document.getElementById('registroTelefono').value.trim();
+        const correo = document.getElementById('registroCorreo').value.trim();
+        const password = document.getElementById('registroPassword').value;
+        const coloniaId = document.getElementById('registroColonia').value;
+        const resultado = await registrarUsuario({ telefono, password, coloniaId , correo});
+        guardarSesion(resultado);
+        mostrarExito(`Cuenta creada. Tu ID es ${resultado.usuario.id} — guardalo, lo necesitás para iniciar sesión.`);
+        setTimeout(() => { window.location.href = 'pages/calendarioRutas.html'; }, 2500);
+      } catch (err) {
+        mostrarError(err.message);
+      }
+    }
+
+    cargarColonias();
+  </script>
+</body>
+</html>

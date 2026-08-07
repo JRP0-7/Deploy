@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cobertura del Día — CleanCity SPS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../../css/Style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            gov: { 900: '#090d16' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../../js/adminGuard.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden">
+
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 glass-nav flex-col z-40 border-r border-slate-800/60">
+    <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800/60">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-lg shadow-lg shadow-brand-500/25">♻️</div>
+      <div>
+        <div class="font-black tracking-tight text-sm">CleanCity <span class="text-brand-400">SPS</span></div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Panel Operativo</div>
+      </div>
+    </div>
+
+    <nav class="flex-1 py-6 px-4 space-y-1 text-xs font-semibold">
+      <a href="resumen.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-gauge-high w-4 text-center text-brand-400"></i> Resumen Operativo
+      </a>
+      <a href="cobertura.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 border border-brand-500/25 text-brand-400">
+        <i class="fa-solid fa-map-location-dot w-4 text-center"></i> Cobertura del Día
+      </a>
+      <a href="camiones.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-truck-fast w-4 text-center text-amber-400"></i> Flota de Camiones
+      </a>
+      <a href="denuncias.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-inbox w-4 text-center text-rose-400"></i> Bandeja de Reportes
+      </a>
+    </nav>
+
+    <div class="px-4 pb-6 space-y-2 border-t border-slate-800/60 pt-4">
+      <a href="../../index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+        <i class="fa-solid fa-globe w-4 text-center"></i> Portal Ciudadano
+      </a>
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-rose-300 text-xs font-semibold transition">
+        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="lg:pl-64">
+    <div class="glass-nav h-20 px-4 sm:px-6 flex items-center justify-between border-b border-slate-800/60">
+      <div class="flex items-center gap-3">
+        <div class="lg:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center">♻️</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black text-white">Cobertura del Día</h1>
+          <p class="text-[11px] text-slate-400" id="fechaHoy"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="location.reload()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-brand-400 transition" title="Refrescar">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+        <button onclick="logout()" class="lg:hidden w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-300 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="lg:pl-64">
+    <div class="p-4 sm:p-6 space-y-6">
+
+      <div id="demoBanner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs rounded-2xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Modo demostración: no se pudieron cargar colonias del backend, se muestran datos de ejemplo.</span>
+      </div>
+
+      <div class="glass-card rounded-3xl p-5 border border-slate-800">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-bold text-white">Recolección programada por colonia</h2>
+              <p class="text-[11px] text-slate-400">Mapa y listado de la cobertura de hoy</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] font-semibold">
+            <span class="flex items-center gap-1.5 text-emerald-300"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Ruta hoy</span>
+            <span class="flex items-center gap-1.5 text-slate-400"><span class="w-2.5 h-2.5 rounded-full bg-slate-600"></span> Otro día</span>
+          </div>
+        </div>
+        <div id="mapContainer" class="h-[460px] rounded-2xl border border-slate-800 bg-slate-900 z-0"></div>
+      </div>
+
+      <!-- Lista de colonias -->
+      <div class="glass-card rounded-3xl p-5 border border-slate-800">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white">Colonias en ruta hoy</h2>
+            <p class="text-[11px] text-slate-400" id="listaSub">—</p>
+          </div>
+        </div>
+        <div id="coloniasList" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div class="text-xs text-slate-500 animate-pulse">Cargando colonias...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const hoyNum = (new Date().getDay() === 0) ? 7 : new Date().getDay();
+
+    const DEMO_COLONIAS = [
+      { id: 'col-rivera-hernandez', nombre: 'Rivera Hernández', distrito: 'Distrito 1', lat: 15.5323, lon: -88.0479 },
+      { id: 'col-la-pradera', nombre: 'La Pradera', distrito: 'Distrito 2', lat: 15.5024, lon: -88.0290 },
+      { id: 'col-satelite', nombre: 'Colonia Satélite', distrito: 'Distrito 2', lat: 15.4893, lon: -88.0220 },
+      { id: 'col-guamilito', nombre: 'Barrio Guamilito', distrito: 'Distrito 3', lat: 15.5071, lon: -88.0260 },
+      { id: 'col-sula', nombre: 'Colonia Sula', distrito: 'Distrito 4', lat: 15.5102, lon: -88.0330 },
+      { id: 'col-cabanas', nombre: 'Colonia Cabañas', distrito: 'Distrito 3', lat: 15.5150, lon: -88.0300 }
+    ];
+    const DEMO_CAL = (id, i) => ({ diasProgramados: i % 2 ? [1, 4] : [2, 5], ventanaInicio: '06:00', ventanaFin: '12:00' });
+
+    let colonias = [];
+    let calendarios = new Map();
+
+    function fmtDias(dias) {
+      return dias.map(d => DIAS[d - 1]).join(', ');
+    }
+
+    function logout() {
+      cerrarSesion();
+      location.href = 'login.html';
+    }
+
+    function renderMapa() {
+      const map = L.map('mapContainer').setView([15.5066, -88.0250], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 18
+      }).addTo(map);
+
+      colonias.forEach(c => {
+        const cal = calendarios.get(c.id);
+        const enRuta = cal && cal.diasProgramados.includes(hoyNum);
+        const color = enRuta ? '#10b981' : '#475569';
+
+        L.circleMarker([c.lat, c.lon], {
+          radius: enRuta ? 9 : 7,
+          color: '#0f172a', weight: 2,
+          fillColor: color, fillOpacity: 0.9
+        }).addTo(map)
+          .bindPopup(`<div style="font-family:Inter,sans-serif;color:#0f172a;font-size:12px">
+            <b>${c.nombre}</b><br/>
+            <span style="color:#475569">${c.distrito || ''}</span><br/><br/>
+            <b>Recolección:</b> ${cal ? fmtDias(cal.diasProgramados) : 'sin calendario'}<br/>
+            <b>Ventana:</b> ${cal ? cal.ventanaInicio + ' – ' + cal.ventanaFin : '—'}<br/>
+            <b>${enRuta ? '✅ En ruta HOY' : '⏳ No pasa hoy'}</b>
+          </div>`);
+      });
+    }
+
+    function renderLista() {
+      const enRuta = colonias.filter(c => {
+        const cal = calendarios.get(c.id);
+        return cal && cal.diasProgramados.includes(hoyNum);
+      });
+      document.getElementById('listaSub').textContent = enRuta.length + ' de ' + colonias.length + ' colonias · ' + DIAS[hoyNum - 1];
+
+      const container = document.getElementById('coloniasList');
+      container.innerHTML = colonias.map(c => {
+        const cal = calendarios.get(c.id);
+        const enRutaHoy = cal && cal.diasProgramados.includes(hoyNum);
+        return `
+          <div class="bg-slate-950/70 border ${enRutaHoy ? 'border-emerald-500/30' : 'border-slate-800'} rounded-2xl p-4">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <div class="font-bold text-white text-xs">${c.nombre}</div>
+              ${enRutaHoy
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Ruta hoy</span>'
+                : '<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Otro día</span>'}
+            </div>
+            <div class="text-[11px] text-slate-400 space-y-0.5">
+              <div><span class="text-slate-600">Distrito:</span> ${c.distrito || '—'}</div>
+              <div><span class="text-slate-600">Días:</span> ${cal ? fmtDias(cal.diasProgramados) : 'sin calendario'}</div>
+              <div><span class="text-slate-600">Ventana:</span> ${cal ? cal.ventanaInicio + ' – ' + cal.ventanaFin : '—'}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function cargarDatos() {
+      try {
+        colonias = await apiGet('/api/colonias');
+        for (const c of colonias) {
+          const cal = await apiGet('/api/calendario/' + c.id).catch(() => null);
+          if (cal) calendarios.set(c.id, cal);
+        }
+        if (!colonias.length) throw new Error('vacío');
+      } catch (e) {
+        document.getElementById('demoBanner').classList.remove('hidden');
+        colonias = DEMO_COLONIAS;
+        colonias.forEach((c, i) => calendarios.set(c.id, DEMO_CAL(c.id, i)));
+      }
+      renderMapa();
+      renderLista();
+    }
+
+    async function init() {
+      document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-HN', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      await cargarDatos();
+    }
+
+    init();
+  </script>
+</body>
+</html>

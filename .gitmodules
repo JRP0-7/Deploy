@@ -1,0 +1,3 @@
+[submodule "Ventd-backend"]
+	path = Ventd-backend
+	url = https://github.com/Puzzle-Hackathon-2026/Ventd-backend

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resumen Operativo — CleanCity SPS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/Style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            gov: { 900: '#090d16' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="../../js/api.js"></script>
+  <script src="../../js/adminGuard.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden">
+
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 glass-nav flex-col z-40 border-r border-slate-800/60">
+    <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800/60">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-lg shadow-lg shadow-brand-500/25">♻️</div>
+      <div>
+        <div class="font-black tracking-tight text-sm">CleanCity <span class="text-brand-400">SPS</span></div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Panel Operativo</div>
+      </div>
+    </div>
+
+    <nav class="flex-1 py-6 px-4 space-y-1 text-xs font-semibold">
+      <a href="resumen.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 border border-brand-500/25 text-brand-400">
+        <i class="fa-solid fa-gauge-high w-4 text-center"></i> Resumen Operativo
+      </a>
+      <a href="cobertura.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-map-location-dot w-4 text-center text-cyan-400"></i> Cobertura del Día
+      </a>
+      <a href="camiones.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-truck-fast w-4 text-center text-amber-400"></i> Flota de Camiones
+      </a>
+      <a href="denuncias.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-inbox w-4 text-center text-rose-400"></i> Bandeja de Reportes
+      </a>
+    </nav>
+
+    <div class="px-4 pb-6 space-y-2 border-t border-slate-800/60 pt-4">
+      <a href="../../index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+        <i class="fa-solid fa-globe w-4 text-center"></i> Portal Ciudadano
+      </a>
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-rose-300 text-xs font-semibold transition">
+        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="lg:pl-64">
+    <div class="glass-nav h-20 px-4 sm:px-6 flex items-center justify-between border-b border-slate-800/60">
+      <div class="flex items-center gap-3">
+        <div class="lg:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center">♻️</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black text-white">Resumen Operativo</h1>
+          <p class="text-[11px] text-slate-400" id="fechaHoy"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 bg-slate-900 border border-slate-700/80 px-3 py-2 rounded-xl">
+          <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div class="leading-tight">
+            <div class="text-xs font-bold text-white font-mono" id="userNombre">—</div>
+            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Administrador</div>
+          </div>
+        </div>
+        <button onclick="logout()" class="lg:hidden w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-300 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="lg:pl-64">
+    <div class="p-4 sm:p-6 space-y-6">
+
+      <!-- KPIs del día -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="cobertura.html" class="glass-card glass-card-hover rounded-2xl p-4 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Colonias en ruta hoy</span>
+            <i class="fa-solid fa-calendar-day text-brand-400"></i>
+          </div>
+          <div class="text-3xl font-black text-white"><span id="kpiColonias">—</span><span class="text-sm text-slate-500 font-bold" id="kpiColoniasTotal"></span></div>
+          <div class="text-[11px] text-slate-500" id="kpiColoniasSub"></div>
+        </a>
+
+        <a href="cobertura.html" class="glass-card glass-card-hover rounded-2xl p-4 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Cobertura del día</span>
+            <i class="fa-solid fa-chart-pie text-cyan-400"></i>
+          </div>
+          <div class="text-3xl font-black text-white" id="kpiCobertura">—</div>
+          <div class="text-[11px] text-slate-500">% de colonias atendidas</div>
+        </a>
+
+        <a href="camiones.html" class="glass-card glass-card-hover rounded-2xl p-4 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Camiones activos</span>
+            <i class="fa-solid fa-truck-fast text-amber-400"></i>
+          </div>
+          <div class="text-3xl font-black text-white"><span id="kpiCamiones">—</span><span class="text-sm text-slate-500 font-bold" id="kpiCamionesTotal"></span></div>
+          <div class="text-[11px] text-slate-500" id="kpiCamionesSub"></div>
+        </a>
+
+        <a href="denuncias.html" class="glass-card glass-card-hover rounded-2xl p-4 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Reportes pendientes</span>
+            <i class="fa-solid fa-inbox text-rose-400"></i>
+          </div>
+          <div class="text-3xl font-black text-white" id="kpiPendientes">—</div>
+          <div class="text-[11px] text-slate-500">en bandeja ciudadana</div>
+        </a>
+      </section>
+
+      <!-- Accesos rápidos -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="cobertura.html" class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800 group">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <h3 class="text-sm font-bold text-white mb-1">Mapa de Cobertura</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Colonias con recolección programada hoy y sus ventanas horarias.</p>
+        </a>
+
+        <a href="camiones.html" class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800 group">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-truck-fast"></i>
+          </div>
+          <h3 class="text-sm font-bold text-white mb-1">Flota de Camiones</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Estado operativo de cada unidad: activo, en pausa o con incidente.</p>
+        </a>
+
+        <a href="denuncias.html" class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800 group">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <h3 class="text-sm font-bold text-white mb-1">Bandeja de Reportes</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Denuncias ciudadanas: confirmaciones, verificación y seguimiento.</p>
+        </a>
+      </section>
+
+      <div id="demoBanner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs rounded-2xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>No se pudieron cargar los datos del backend, se usan valores de ejemplo.</span>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const hoyNum = (new Date().getDay() === 0) ? 7 : new Date().getDay();
+
+    const DEMO_COLONIAS = [
+      { id: 'col-rivera-hernandez', nombre: 'Rivera Hernández' },
+      { id: 'col-la-pradera', nombre: 'La Pradera' },
+      { id: 'col-satelite', nombre: 'Colonia Satélite' },
+      { id: 'col-guamilito', nombre: 'Barrio Guamilito' },
+      { id: 'col-sula', nombre: 'Colonia Sula' },
+      { id: 'col-cabanas', nombre: 'Colonia Cabañas' }
+    ];
+    const DEMO_CAL = (id, dias) => ({ diasProgramados: dias, ventanaInicio: '06:00', ventanaFin: '12:00' });
+
+    let colonias = [];
+    let calendarios = new Map();
+    let camionesData = [];
+    let modoDemo = false;
+
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-slate-800';
+      toast.className = `${bgColor} border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function logout() {
+      cerrarSesion();
+      location.href = 'login.html';
+    }
+
+    async function cargarDatos() {
+      try {
+        colonias = await apiGet('/api/colonias');
+        for (const c of colonias) {
+          const cal = await apiGet('/api/calendario/' + c.id).catch(() => null);
+          if (cal) calendarios.set(c.id, cal);
+        }
+        if (!colonias.length) throw new Error('vacío');
+      } catch (e) {
+        modoDemo = true;
+        document.getElementById('demoBanner').classList.remove('hidden');
+        colonias = DEMO_COLONIAS;
+        colonias.forEach((c, i) => calendarios.set(c.id, DEMO_CAL(c.id, i % 2 ? [1, 4] : [2, 5])));
+      }
+
+      try {
+        const data = await apiGet('/api/camiones');
+        if (data && data.length) camionesData = data;
+      } catch (e) { /* demo */ }
+
+      renderKpis();
+
+      try {
+        const denuncias = await apiGet('/api/denuncias');
+        const pendientes = denuncias.filter(d => d.estado === 'pendiente').length;
+        document.getElementById('kpiPendientes').textContent = pendientes;
+      } catch (e) {
+        document.getElementById('kpiPendientes').textContent = '3';
+      }
+    }
+
+    function renderKpis() {
+      const enRuta = colonias.filter(c => {
+        const cal = calendarios.get(c.id);
+        return cal && cal.diasProgramados.includes(hoyNum);
+      });
+      const cobertura = colonias.length ? Math.round((enRuta.length / colonias.length) * 100) : 0;
+      const activos = camionesData.filter(t => t.estado === 'activo').length;
+
+      document.getElementById('kpiColonias').textContent = enRuta.length;
+      document.getElementById('kpiColoniasTotal').textContent = ' / ' + colonias.length;
+      document.getElementById('kpiColoniasSub').textContent = 'hoy ' + DIAS[hoyNum - 1];
+      document.getElementById('kpiCobertura').textContent = cobertura + '%';
+      document.getElementById('kpiCamiones').textContent = activos;
+      document.getElementById('kpiCamionesTotal').textContent = ' / ' + camionesData.length;
+      document.getElementById('kpiCamionesSub').textContent = activos ? 'operativos ahora' : 'sin unidades activas';
+    }
+
+    async function init() {
+      document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-HN', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      const payload = decodeJwt(getToken());
+      document.getElementById('userNombre').textContent = payload ? payload.id : getUsuarioId();
+      await cargarDatos();
+    }
+
+    init();
+  </script>
+</body>
+</html>

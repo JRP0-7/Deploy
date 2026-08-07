@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Rutas — CleanCity SPS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/Style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            gov: { 900: '#090d16' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="../../js/api.js"></script>
+  <script src="../../js/empleadoGuard.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden">
+
+  <header class="glass-nav h-20 px-4 sm:px-6 flex items-center justify-between border-b border-slate-800/60">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-brand-600 flex items-center justify-center text-lg shadow-lg shadow-cyan-500/25">🚛</div>
+      <div>
+        <div class="font-black tracking-tight text-sm text-white">CleanCity <span class="text-brand-400">SPS</span></div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Panel del Conductor</div>
+      </div>
+    </div>
+    <button onclick="logout()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-300 transition" title="Cerrar sesión">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </header>
+
+  <main class="p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
+
+    <!-- Camión asignado -->
+    <section id="camionCard" class="hidden glass-card rounded-2xl p-5 border border-slate-800">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div id="estadoIcono" class="w-11 h-11 rounded-xl border flex items-center justify-center text-base"></div>
+          <div>
+            <div class="text-sm font-black text-white font-mono" id="camionPlaca">—</div>
+            <div class="text-[11px] text-slate-500" id="camionUnidad">—</div>
+          </div>
+        </div>
+        <span id="estadoBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5"></span>
+      </div>
+    </section>
+
+    <div id="sinCamion" class="hidden glass-card rounded-2xl p-6 border border-slate-800 text-center text-sm text-slate-400">
+      <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl mb-2 block"></i>
+      No tienes un camión asignado. Contacta a tu administrador.
+    </div>
+
+    <!-- Paradas de hoy -->
+    <section id="paradasWrap" class="hidden space-y-3">
+      <div class="flex items-center justify-between px-1">
+        <h2 class="text-sm font-black text-white">Paradas de hoy</h2>
+        <span id="fechaHoy" class="text-[11px] text-slate-500"></span>
+      </div>
+      <div id="paradasList" class="space-y-3">
+        <div class="text-xs text-slate-500 animate-pulse">Cargando rutas...</div>
+      </div>
+    </section>
+
+    <div id="sinParadas" class="hidden glass-card rounded-2xl p-6 border border-slate-800 text-center text-sm text-slate-400">
+      <i class="fa-solid fa-calendar-check text-brand-400 text-xl mb-2 block"></i>
+      No tienes colonias programadas para hoy.
+    </div>
+
+    <!-- Formulario reportar problema -->
+    <section id="problemaCard" class="hidden glass-card rounded-2xl p-6 border border-slate-800 space-y-3">
+      <div class="text-sm font-bold text-white">Describe el problema — <span id="problemaColonia" class="text-slate-400 font-normal"></span></div>
+      <textarea id="notaProblema" rows="3" placeholder="Ej: llanta ponchada, avería del motor, calle bloqueada..."
+        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-rose-500 transition resize-none"></textarea>
+      <div class="flex gap-3">
+        <button onclick="enviarProblema()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl text-sm transition">Enviar reporte</button>
+        <button onclick="cerrarProblema()" class="px-4 bg-slate-900 border border-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-sm transition">Cancelar</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    const ESTADO_CFG = {
+      activo:        { label: 'Activo',        cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', icon: 'fa-truck-pickup' },
+      en_pausa:      { label: 'En pausa',      cls: 'bg-amber-500/20 text-amber-300 border-amber-500/30',       icon: 'fa-pause' },
+      con_incidente: { label: 'Con incidente', cls: 'bg-rose-500/20 text-rose-300 border-rose-500/30',           icon: 'fa-triangle-exclamation' },
+    };
+
+    let camionActual = null;
+    let paradaEnProblema = null;
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-rose-600';
+      toast.className = `${bgColor} border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function logout() {
+      cerrarSesion();
+      location.href = 'login.html';
+    }
+
+    function renderCamion() {
+      const c = camionActual;
+      document.getElementById('sinCamion').classList.toggle('hidden', !!c);
+      document.getElementById('camionCard').classList.toggle('hidden', !c);
+      if (!c) return;
+
+      const st = ESTADO_CFG[c.estado] || ESTADO_CFG.en_pausa;
+      document.getElementById('camionPlaca').textContent = c.placa;
+      document.getElementById('camionUnidad').textContent = 'Unidad ' + c.id;
+
+      const icono = document.getElementById('estadoIcono');
+      icono.className = `w-11 h-11 rounded-xl border flex items-center justify-center text-base ${st.cls}`;
+      icono.innerHTML = `<i class="fa-solid ${st.icon}"></i>`;
+
+      const badge = document.getElementById('estadoBadge');
+      badge.className = `px-2.5 py-1 rounded-full text-[10px] font-bold border flex items-center gap-1.5 ${st.cls}`;
+      badge.textContent = st.label;
+    }
+
+    function renderParadas(paradas) {
+      document.getElementById('paradasWrap').classList.toggle('hidden', !paradas.length);
+      document.getElementById('sinParadas').classList.toggle('hidden', paradas.length > 0);
+      document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-HN', {
+        weekday: 'long', day: 'numeric', month: 'long'
+      });
+
+      document.getElementById('paradasList').innerHTML = paradas.map((p, i) => {
+        const tieneProblema = !!p.incidente;
+        const badgeCls = p.completada
+          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+          : tieneProblema
+            ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+            : 'bg-slate-800 text-slate-400 border-slate-700';
+        const badgeTxt = p.completada ? 'Completada' : tieneProblema ? 'Con problema' : 'Pendiente';
+        return `
+          <div class="glass-card rounded-2xl p-4 border border-slate-800">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 text-[11px] font-bold flex items-center justify-center text-slate-400">${i + 1}</span>
+                <span class="text-sm font-bold text-white">${p.coloniaNombre || p.coloniaId}</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full ${badgeCls} text-[10px] font-bold border">${badgeTxt}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 mb-3">
+              Ventana: ${p.horaInicio || '—'} ${p.horaFin ? '→ ' + p.horaFin : ''}
+              ${p.nota ? ' · ' + p.nota : ''}
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button ${p.completada ? 'disabled' : ''} onclick="completarParada('${p.id}')"
+                class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-circle-check"></i> Completar
+              </button>
+              <button onclick="abrirProblema('${p.id}', '${(p.coloniaNombre || p.coloniaId).replace(/'/g, "\\'")}')"
+                class="w-full bg-rose-600/20 hover:bg-rose-600/30 border border-rose-600/40 text-rose-300 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation"></i> Problema
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function cargarTodo() {
+      try {
+        camionActual = await obtenerCamionEmpleado();
+      } catch (e) {
+        camionActual = null;
+      }
+      renderCamion();
+
+      try {
+        const paradas = await obtenerRutasHoyEmpleado();
+        renderParadas(paradas);
+      } catch (e) {
+        document.getElementById('paradasList').innerHTML = `<div class="text-xs text-rose-400">${e.message}</div>`;
+        document.getElementById('paradasWrap').classList.remove('hidden');
+      }
+    }
+
+    async function completarParada(rutaId) {
+      try {
+        await completarParadaEmpleado(rutaId);
+        showToast('Parada marcada como completada');
+        await cargarTodo();
+      } catch (e) {
+        showToast(e.message || 'No se pudo completar', 'error');
+      }
+    }
+
+    function abrirProblema(rutaId, coloniaNombre) {
+      paradaEnProblema = rutaId;
+      document.getElementById('problemaColonia').textContent = coloniaNombre;
+      document.getElementById('problemaCard').classList.remove('hidden');
+      document.getElementById('notaProblema').focus();
+      document.getElementById('problemaCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cerrarProblema() {
+      paradaEnProblema = null;
+      document.getElementById('problemaCard').classList.add('hidden');
+      document.getElementById('notaProblema').value = '';
+    }
+
+    async function enviarProblema() {
+      const nota = document.getElementById('notaProblema').value.trim();
+      if (!nota) return showToast('Describe el problema', 'error');
+      if (!paradaEnProblema) return;
+      try {
+        await reportarProblemaParadaEmpleado(paradaEnProblema, nota);
+        showToast('Problema reportado');
+        cerrarProblema();
+        await cargarTodo();
+      } catch (e) {
+        showToast(e.message || 'No se pudo enviar el reporte', 'error');
+      }
+    }
+
+    cargarTodo();
+  </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis Denuncias — CleanCity SPS</title>
+  <script src="../js/authGuard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, gov: { 900: '#090d16', gold: '#fbbf24' } } } } }
+  </script>
+  <script src="../js/api.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+  <header class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="../index.html" class="font-black text-white">CleanCity <span class="text-brand-400">SPS</span></a>
+      <nav class="flex items-center gap-4 text-xs font-semibold uppercase text-slate-300">
+        <a href="calendarioRutas.html" class="hover:text-brand-400">Calendario</a>
+        <a href="verHorarios.html" class="hover:text-brand-400">Horarios</a>
+        <a href="crearDenuncia.html" class="hover:text-brand-400">Denunciar</a>
+        <a href="consultarDenuncias.html" class="text-brand-400">Mis denuncias</a>
+        <a href="mapaRutas.html" class="hover:text-brand-400">Mapa</a>
+        <button onclick="cerrarSesion(); window.location.href='../login.html';" class="text-red-300 hover:text-red-200">Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-black text-white mb-1">Denuncias de tu colonia</h1>
+    <p class="text-sm text-slate-400 mb-6">Confirmá las de tus vecinos para que tengan más peso.</p>
+
+    <div id="estadoCarga" class="text-sm text-slate-400">Cargando...</div>
+    <div id="lista" class="hidden space-y-3"></div>
+    <div id="estadoVacio" class="hidden text-sm text-slate-400">Todavía no hay denuncias en tu colonia.</div>
+    <div id="estadoError" class="hidden text-sm text-red-300"></div>
+  </main>
+
+  <script>
+    const ETIQUETAS_TIPO = {
+      basura_acumulada: 'Basura acumulada',
+      no_paso_camion: 'El camión no pasó',
+      botadero_ilegal: 'Punto ilegal de disposición'
+    };
+
+    function tarjetaDenuncia(denuncia, usuarioId) {
+      const esPropia = denuncia.usuarioId === usuarioId;
+      const badgeAdmin = denuncia.verificadoAdmin
+        ? '<span class="text-[10px] font-bold uppercase text-brand-400"><i class="fa-solid fa-shield-check mr-1"></i>Verificado por admin</span>'
+        : '<span class="text-[10px] font-bold uppercase text-slate-500">Sin verificar por admin</span>';
+      const botonConfirmar = esPropia
+        ? ''
+        : `<button onclick="confirmar('${denuncia.id}')" class="text-xs font-bold text-brand-400 hover:text-brand-300">
+             <i class="fa-solid fa-thumbs-up mr-1"></i>Confirmar (${denuncia.confirmacionesComunidad})
+           </button>`;
+      return `
+        <div class="glass-card border border-slate-800 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-bold text-white">${ETIQUETAS_TIPO[denuncia.tipo] || denuncia.tipo}</span>
+            <span class="text-[10px] uppercase font-bold text-amber-400">${denuncia.estado}</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">${denuncia.descripcion || 'Sin descripción'}</p>
+          <div class="flex items-center justify-between">
+            ${badgeAdmin}
+            ${botonConfirmar || `<span class="text-xs text-slate-500">Confirmaciones: ${denuncia.confirmacionesComunidad}</span>`}
+          </div>
+        </div>
+      `;
+    }
+
+    async function confirmar(id) {
+      try {
+        await confirmarDenuncia(id);
+        await cargar();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function cargar() {
+      const usuario = obtenerUsuario();
+      document.getElementById('estadoCarga').classList.remove('hidden');
+      document.getElementById('lista').classList.add('hidden');
+      document.getElementById('estadoVacio').classList.add('hidden');
+      document.getElementById('estadoError').classList.add('hidden');
+      try {
+        const denuncias = await listarDenuncias();
+        document.getElementById('estadoCarga').classList.add('hidden');
+        if (denuncias.length === 0) {
+          document.getElementById('estadoVacio').classList.remove('hidden');
+          return;
+        }
+        const lista = document.getElementById('lista');
+        lista.innerHTML = denuncias.map((d) => tarjetaDenuncia(d, usuario.id)).join('');
+        lista.classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('estadoError').textContent = err.message;
+        document.getElementById('estadoError').classList.remove('hidden');
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario de Recolección — CleanCity SPS</title>
+  <script src="../js/authGuard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: { brand: { 400: '#34d399', 500: '#10b981', 600: '#059669' }, gov: { 900: '#090d16', gold: '#fbbf24' } } } } }
+  </script>
+  <script src="../js/api.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+  <header class="glass-nav sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="../index.html" class="font-black text-white">CleanCity <span class="text-brand-400">SPS</span></a>
+      <nav class="flex items-center gap-4 text-xs font-semibold uppercase text-slate-300">
+        <a href="calendarioRutas.html" class="text-brand-400">Calendario</a>
+        <a href="verHorarios.html" class="hover:text-brand-400">Horarios</a>
+        <a href="crearDenuncia.html" class="hover:text-brand-400">Denunciar</a>
+        <a href="consultarDenuncias.html" class="hover:text-brand-400">Mis denuncias</a>
+        <a href="mapaRutas.html" class="hover:text-brand-400">Mapa</a>
+        <button onclick="cerrarSesion(); window.location.href='../login.html';" class="text-red-300 hover:text-red-200">Salir</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-black text-white mb-1">Calendario de recolección</h1>
+    <p class="text-sm text-slate-400 mb-6">Días en que el camión pasa por tu colonia.</p>
+
+    <div id="estadoCarga" class="text-sm text-slate-400">Cargando...</div>
+    <div id="calendarioContenido" class="hidden">
+      <div id="gridDias" class="grid grid-cols-7 gap-2 mb-6"></div>
+      <div class="glass-card rounded-xl border border-slate-800 p-4 text-sm text-slate-300">
+        <i class="fa-solid fa-clock text-brand-400 mr-2"></i>
+        Ventana horaria: <span id="ventanaHorario" class="font-semibold text-white"></span>
+      </div>
+    </div>
+    <div id="estadoError" class="hidden text-sm text-red-300"></div>
+  </main>
+
+  <script>
+    const NOMBRES_DIAS = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+    async function iniciar() {
+      const usuario = obtenerUsuario();
+      if (!usuario || !usuario.coloniaId) {
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('estadoError').textContent = 'No tenés colonia asignada en tu cuenta.';
+        document.getElementById('estadoError').classList.remove('hidden');
+        return;
+      }
+      try {
+        const calendario = await obtenerCalendario(usuario.coloniaId);
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('calendarioContenido').classList.remove('hidden');
+        const grid = document.getElementById('gridDias');
+        grid.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((dia) => {
+          const activo = calendario.diasProgramados.includes(dia);
+          return `<div class="rounded-xl py-4 text-center text-xs font-bold border ${activo ? 'bg-brand-600 border-brand-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-500'}">${NOMBRES_DIAS[dia]}</div>`;
+        }).join('');
+        document.getElementById('ventanaHorario').textContent =
+          `${calendario.ventanaInicio} — ${calendario.ventanaFin}`;
+      } catch (err) {
+        document.getElementById('estadoCarga').classList.add('hidden');
+        document.getElementById('estadoError').textContent = err.message;
+        document.getElementById('estadoError').classList.remove('hidden');
+      }
+    }
+
+    iniciar();
+  </script>
+</body>
+</html>

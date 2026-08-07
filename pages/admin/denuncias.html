@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bandeja de Reportes — CleanCity SPS</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/Style.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            gov: { 900: '#090d16' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="../../js/api.js"></script>
+  <script src="../../js/adminGuard.js"></script>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden">
+
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 glass-nav flex-col z-40 border-r border-slate-800/60">
+    <div class="h-20 flex items-center gap-3 px-6 border-b border-slate-800/60">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center text-lg shadow-lg shadow-brand-500/25">♻️</div>
+      <div>
+        <div class="font-black tracking-tight text-sm">CleanCity <span class="text-brand-400">SPS</span></div>
+        <div class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Panel Operativo</div>
+      </div>
+    </div>
+
+    <nav class="flex-1 py-6 px-4 space-y-1 text-xs font-semibold">
+      <a href="resumen.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-gauge-high w-4 text-center text-brand-400"></i> Resumen Operativo
+      </a>
+      <a href="cobertura.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-map-location-dot w-4 text-center text-cyan-400"></i> Cobertura del Día
+      </a>
+      <a href="camiones.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-900 hover:border hover:border-slate-800 transition">
+        <i class="fa-solid fa-truck-fast w-4 text-center text-amber-400"></i> Flota de Camiones
+      </a>
+      <a href="denuncias.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 border border-brand-500/25 text-brand-400">
+        <i class="fa-solid fa-inbox w-4 text-center"></i> Bandeja de Reportes
+      </a>
+    </nav>
+
+    <div class="px-4 pb-6 space-y-2 border-t border-slate-800/60 pt-4">
+      <a href="../../index.html" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-semibold transition">
+        <i class="fa-solid fa-globe w-4 text-center"></i> Portal Ciudadano
+      </a>
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-rose-300 text-xs font-semibold transition">
+        <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header class="lg:pl-64">
+    <div class="glass-nav h-20 px-4 sm:px-6 flex items-center justify-between border-b border-slate-800/60">
+      <div class="flex items-center gap-3">
+        <div class="lg:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center">♻️</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-black text-white">Bandeja de Reportes Ciudadanos</h1>
+          <p class="text-[11px] text-slate-400">Revisa, verifica y da seguimiento a las denuncias</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="cargarDenuncias()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-brand-400 transition" title="Refrescar">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+        <button onclick="logout()" class="lg:hidden w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-300 transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="lg:pl-64">
+    <div class="p-4 sm:p-6 space-y-6">
+
+      <div id="demoBanner" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs rounded-2xl px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Modo demostración: el backend no respondió, se muestran reportes de ejemplo. Inicia <span class="font-mono">Ventd-backend</span> para datos reales.</span>
+      </div>
+
+      <!-- Filtros por estado -->
+      <div id="filtros" class="flex flex-wrap gap-2"></div>
+
+      <!-- Tabla -->
+      <div class="glass-card rounded-3xl border border-slate-800 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Fecha</th>
+                <th class="py-3 px-4">Tipo</th>
+                <th class="py-3 px-4">Colonia</th>
+                <th class="py-3 px-4">Descripción</th>
+                <th class="py-3 px-4 text-center">Vecinos</th>
+                <th class="py-3 px-4">Verificación</th>
+                <th class="py-3 px-4">Estado</th>
+                <th class="py-3 px-4 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="denunciasBody" class="divide-y divide-slate-800/60">
+              <tr>
+                <td colspan="8" class="py-10 text-center text-slate-500 text-xs animate-pulse">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i>Cargando reportes...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    const TIPOS = {
+      basura_acumulada: 'Basura acumulada',
+      no_paso_camion: 'No pasó el camión',
+      botadero_ilegal: 'Botadero ilegal'
+    };
+    const ESTADOS = {
+      pendiente:   { label: 'Pendiente',   cls: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
+      en_atencion: { label: 'En atención', cls: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' },
+      resuelto:    { label: 'Resuelto',    cls: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
+      descartado:  { label: 'Descartado',  cls: 'bg-rose-500/20 text-rose-300 border-rose-500/30' }
+    };
+
+    const DEMO_DENUNCIAS = [
+      { id: 'den-1001', usuarioId: 'CIU-00012', coloniaId: 'col-rivera-hernandez', coloniaNombre: 'Rivera Hernández', tipo: 'basura_acumulada', descripcion: 'Acumulación de bolsas frente al parque, 3 días sin recoger.', estado: 'pendiente', confirmacionesComunidad: 5, verificadoAdmin: false, creadoEn: '2026-08-05T09:20:00Z' },
+      { id: 'den-1002', usuarioId: 'CIU-00007', coloniaId: 'col-guamilito', coloniaNombre: 'Barrio Guamilito', tipo: 'no_paso_camion', descripcion: 'El camión no pasó el jueves programado.', estado: 'en_atencion', confirmacionesComunidad: 8, verificadoAdmin: true, creadoEn: '2026-08-05T07:45:00Z' },
+      { id: 'den-1003', usuarioId: 'CIU-00021', coloniaId: 'col-satelite', coloniaNombre: 'Colonia Satélite', tipo: 'botadero_ilegal', descripcion: 'Botadero ilegal en solar baldío, cerca de la entrada norte.', estado: 'pendiente', confirmacionesComunidad: 3, verificadoAdmin: false, creadoEn: '2026-08-06T11:10:00Z' },
+      { id: 'den-1004', usuarioId: 'CIU-00003', coloniaId: 'col-la-pradera', coloniaNombre: 'La Pradera', tipo: 'basura_acumulada', descripcion: 'Contenedores desbordados en la calle principal.', estado: 'resuelto', confirmacionesComunidad: 2, verificadoAdmin: true, creadoEn: '2026-08-04T15:30:00Z' },
+      { id: 'den-1005', usuarioId: 'CIU-00009', coloniaId: 'col-cabanas', coloniaNombre: 'Colonia Cabañas', tipo: 'no_paso_camion', descripcion: 'Sin recolección por dos semanas consecutivas.', estado: 'descartado', confirmacionesComunidad: 1, verificadoAdmin: true, creadoEn: '2026-08-03T10:05:00Z' }
+    ];
+
+    let denuncias = [];
+    let filtro = 'todas';
+    let modoDemo = false;
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-slate-800';
+      toast.className = `${bgColor} border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function logout() {
+      cerrarSesion();
+      location.href = 'login.html';
+    }
+
+    function fmtFecha(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('es-HN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return iso || '—';
+      }
+    }
+
+    function contarPorEstado() {
+      const count = {};
+      denuncias.forEach(d => { count[d.estado] = (count[d.estado] || 0) + 1; });
+      return count;
+    }
+
+    function renderFiltros() {
+      const count = contarPorEstado();
+      const tabs = [
+        { key: 'todas', label: 'Todas', n: denuncias.length },
+        ...Object.keys(ESTADOS).map(k => ({ key: k, label: ESTADOS[k].label, n: count[k] || 0 }))
+      ];
+      document.getElementById('filtros').innerHTML = tabs.map(t => `
+        <button onclick="setFiltro('${t.key}')"
+          class="px-4 py-2 rounded-xl text-xs font-bold border transition
+            ${filtro === t.key
+              ? 'bg-brand-500/15 border-brand-500/40 text-brand-400'
+              : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'}"
+          >${t.label} <span class="opacity-60 font-mono">${t.n}</span></button>`).join('');
+    }
+
+    function renderTabla() {
+      const body = document.getElementById('denunciasBody');
+      const lista = filtro === 'todas' ? denuncias : denuncias.filter(d => d.estado === filtro);
+
+      if (!lista.length) {
+        body.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-slate-500 text-xs">
+          <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-40"></i>Sin reportes en esta categoría</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = lista.map(d => {
+        const st = ESTADOS[d.estado] || ESTADOS.pendiente;
+        return `
+          <tr class="hover:bg-slate-900/50 transition">
+            <td class="py-3 px-4 text-slate-400 whitespace-nowrap">${fmtFecha(d.creadoEn)}</td>
+            <td class="py-3 px-4 font-semibold text-slate-100">${TIPOS[d.tipo] || d.tipo}</td>
+            <td class="py-3 px-4 text-slate-300">${d.coloniaNombre || d.coloniaId || '—'}</td>
+            <td class="py-3 px-4 text-slate-400 max-w-[260px] truncate" title="${(d.descripcion || '').replace(/"/g, '&quot;')}">${d.descripcion || '—'}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-flex items-center gap-1 font-mono text-slate-200" title="Vecinos que la confirmaron">
+                <i class="fa-solid fa-people-group text-brand-400"></i>${d.confirmacionesComunidad || 0}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              ${d.verificadoAdmin
+                ? '<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold inline-flex items-center gap-1"><i class="fa-solid fa-check"></i> Verificado por admin</span>'
+                : '<span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Sin verificar</span>'}
+            </td>
+            <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full ${st.cls} border text-[10px] font-bold">${st.label}</span></td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+              ${d.verificadoAdmin
+                ? '<span class="text-[11px] text-slate-500 font-semibold">Verificado</span>'
+                : `<button onclick="verificarAdmin('${d.id}')" class="bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500/40 text-emerald-300 px-3 py-1.5 rounded-lg text-[11px] font-bold transition active:scale-95">
+                    <i class="fa-solid fa-stamp"></i> Verificar</button>`}
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function render() {
+      renderFiltros();
+      renderTabla();
+    }
+
+    function setFiltro(key) {
+      filtro = key;
+      render();
+    }
+
+    async function cargarDenuncias() {
+      const body = document.getElementById('denunciasBody');
+      body.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500 text-xs animate-pulse">
+        <i class="fa-solid fa-spinner fa-spin mr-2"></i>Cargando reportes...</td></tr>`;
+      try {
+        denuncias = await apiGet('/api/denuncias');
+        if (!denuncias.length) throw new Error('vacío');
+      } catch (e) {
+        modoDemo = true;
+        document.getElementById('demoBanner').classList.remove('hidden');
+        denuncias = DEMO_DENUNCIAS;
+      }
+      render();
+    }
+
+    async function verificarAdmin(id) {
+      try {
+        if (modoDemo) {
+          const d = denuncias.find(x => x.id === id);
+          if (d) d.verificadoAdmin = true;
+          showToast('Denuncia verificada (demo)', 'success');
+          render();
+          return;
+        }
+        await apiPatch('/api/denuncias/' + id + '/verificar-admin', {});
+        const d = denuncias.find(x => x.id === id);
+        if (d) d.verificadoAdmin = true;
+        showToast('Denuncia verificada correctamente', 'success');
+        render();
+      } catch (err) {
+        showToast(err.message || 'No se pudo verificar', 'error');
+      }
+    }
+
+    cargarDenuncias();
+  </script>
+</body>
+</html>

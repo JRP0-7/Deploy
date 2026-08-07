@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full scroll-smooth bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta url="https://cleacitySPS.hn" />
+  <title>CleanCity SPS - Portal Oficial de Gestión Urbana y Denuncia Ciudadana</title>
+
+  <!-- Tailwind CSS & FontAwesome Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" type="text/css" href="/Ventd-frontend/css/style.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            gov: {
+              800: '#0f172a',
+              900: '#090d16',
+              gold: '#fbbf24',
+              accent: '#0284c7'
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 5s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            glow: {
+              '0%': { opacity: '0.4', transform: 'scale(1)' },
+              '100%': { opacity: '0.8', transform: 'scale(1.05)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Institutional Bar (Government style) -->
+  <div class="bg-slate-900 border-b border-slate-800/80 text-[11px] text-slate-300 py-2 px-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-4">
+        <span class="flex items-center gap-1.5 font-semibold text-slate-200">
+          <i class="fa-solid fa-building-columns text-amber-400"></i>
+          República de Honduras • Municipalidad de San Pedro Sula
+        </span>
+        <span class="hidden md:inline text-slate-600">|</span>
+        <span class="hidden md:inline text-slate-400">Portal Público de Participación Ciudadana</span>
+      </div>
+      <div class="flex items-center gap-4 text-xs">
+        <a href="#transparencia" class="hover:text-brand-400 transition flex items-center gap-1">
+          <i class="fa-solid fa-file-contract text-cyan-400"></i> Portal de Transparencia
+        </a>
+        <a href="tel:100" class="hover:text-amber-400 transition font-bold text-amber-300 flex items-center gap-1">
+          <i class="fa-solid fa-phone-volume"></i> Línea Municipal 100
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header Navigation -->
+  <header class="sticky top-0 z-40 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand & Municipal Shield -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/25 group-hover:scale-105 transition-transform">
+          <span class="text-2xl">♻️</span>
+        </div>
+        <div>
+          <div class="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
+            CleanCity <span class="text-brand-400">SPS</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Sistema de Gestión Ambiental Urbana</p>
+        </div>
+      </a>
+
+      <!-- Navigation Menu -->
+      <nav class="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+        <a href="#inicio" class="hover:text-brand-400 transition-colors">Inicio</a>
+        <a href="pages/crearDenuncia.html" class="hover:text-brand-400 transition-colors flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span> Denuncia Ciudadana
+        </a>
+        <a href="pages/mapaRutas.html" class="hover:text-brand-400 transition-colors">Mapa SPS Informativo</a>
+        <a href="pages/verHorarios.html" class="hover:text-brand-400 transition-colors">Sectores y Horarios</a>
+        <!-- <a href="#normativa" class="hover:text-brand-400 transition-colors">Guía Ciudadana</a>
+        <a href="#transparencia" class="hover:text-brand-400 transition-colors">Transparencia</a> -->
+      </nav>
+
+      <!-- CTA Action Group -->
+      <div class="flex items-center gap-2.5">
+        <button 
+          onclick="openTrackingModal()" 
+          class="hidden sm:flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95"
+          title="Consultar estado de denuncia con código"
+        >
+          <i class="fa-solid fa-magnifying-glass text-brand-400"></i>
+          <span>Rastrear Denuncia</span>
+        </button>
+
+        <button 
+          onclick="window.location.href='pages/crearDenuncia.html'" 
+          class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 flex items-center gap-2 active:scale-95"
+        >
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>Crear Denuncia</span>
+        </button>
+
+        <a
+          href="login.html"
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"
+        >
+          <i class="fa-solid fa-user text-brand-400"></i>
+          <span>Mi cuenta</span>
+        </a>
+
+        <a
+          href="pages/admin/login.html"
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition hidden md:flex items-center gap-1.5"
+          title="Acceso restringido para personal administrativo"
+        >
+          <i class="fa-solid fa-user-shield text-amber-400"></i>
+          <span>Portal Admin</span>
+        </a>
+
+        <a
+          href="pages/empleado/login.html"
+          class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition hidden md:flex items-center gap-1.5"
+          title="Acceso restringido para conductores"
+        >
+          <i class="fa-solid fa-truck-fast text-cyan-400"></i>
+          <span>Portal Conductor</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="inicio" class="relative pt-12 pb-16 md:pt-16 md:pb-24 overflow-hidden border-b border-slate-800/80">
+    
+    <!-- Visual Glow Background -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-brand-600/15 to-amber-500/10 rounded-full blur-[140px]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <!-- Institutional Announcement Badge -->
+      <div class="flex justify-center mb-6">
+        <div class="gov-badge px-4 py-1.5 rounded-full text-xs font-semibold text-sky-200 flex items-center gap-2 max-w-2xl text-center">
+          <i class="fa-solid fa-shield-halved text-brand-400"></i>
+          <span>Portal Oficial de Servicios Sanitarios y Control Ambiental • Ley de Municipalidades San Pedro Sula</span>
+        </div>
+      </div>
+
+      <div class="text-center max-w-4xl mx-auto space-y-6">
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
+          Plataforma de Control Ambiental y <br class="hidden sm:inline" />
+          <span class="hero-gradient-text">Denuncia Ciudadana de San Pedro Sula</span>
+        </h1>
+
+        <p class="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto font-normal leading-relaxed">
+          Un canal transparente, auditado e integrado para monitorear camiones recolectores, registrar denuncias ambientales y verificar la cobertura en cada barrio y colonia de la Capital Industrial.
+        </p>
+
+        <!-- Search & Tracking Form Hero Bar -->
+        <div class="max-w-2xl mx-auto bg-slate-900/90 border border-slate-700/80 p-2 sm:p-2.5 rounded-2xl shadow-2xl backdrop-blur">
+          <form onsubmit="handleHeroSearch(event)" class="flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+              <input 
+                type="text" 
+                id="heroSearchInput" 
+                placeholder="Ingresa código de denuncia (ej. SPS-2026-8842) o colonia..." 
+                class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs sm:text-sm rounded-xl pl-10 pr-4 py-3 outline-none focus:border-brand-500 transition"
+              />
+            </div>
+            <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Consultar</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Access Service Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 max-w-4xl mx-auto text-left">
+          <a href="#denuncia-portal" class="glass-card p-4 rounded-2xl border border-slate-800 hover:border-amber-500/40 transition group">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="font-bold text-xs text-white">Denuncia Anónima</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Reportar basurero o infracción</div>
+          </a>
+
+          <a href="pages/mapaRutas.html" class="glass-card p-4 rounded-2xl border border-slate-800 hover:border-brand-500/40 transition group">
+            <div class="w-9 h-9 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <div class="font-bold text-xs text-white">Mapa de Cobertura</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Sectores y Puntos Críticos</div>
+          </a>
+
+          <a href="#horarios" class="glass-card p-4 rounded-2xl border border-slate-800 hover:border-cyan-500/40 transition group">
+            <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div class="font-bold text-xs text-white">Calendario de Rutas</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Días y horas de recolección</div>
+          </a>
+
+          <a href="#transparencia" class="glass-card p-4 rounded-2xl border border-slate-800 hover:border-emerald-500/40 transition group">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base mb-2 group-hover:scale-110 transition-transform">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div class="font-bold text-xs text-white">Métricas de Limpieza</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Tonelaje e impacto ambiental</div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Official Citizen Complaint Section (Portal de Denuncia Ciudadana) -->
+  <section id="denuncia-portal" class="py-16 bg-slate-900/60 border-b border-slate-800 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 gap-4 border-b border-slate-800 pb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-scale-balanced"></i> Portal Oficial de Denuncia Ciudadana
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+            Atención a Incidencias e Infracciones Ambientales
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            Conforme al reglamento municipal de aseo de San Pedro Sula, cualquier ciudadano puede denunciar acumulación indebida, cobros irregulares, quema de basura o desacatamiento de cuadrillas.
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button           onclick="window.location.href='pages/crearDenuncia.html'"  class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-amber-500/20 flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> Nueva Denuncia
+          </button>
+          <button onclick="openTrackingModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-3 rounded-xl text-xs font-bold transition">
+            <i class="fa-solid fa-list-check text-brand-400"></i> Consultar Expediente
+          </button>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Reporting Workflow -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 relative">
+          <div class="text-amber-400 font-mono text-xs font-bold mb-2">PASO 01</div>
+          <h3 class="text-sm font-bold text-white mb-1">Identificar la Infracción</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Selecciona el tipo de evento: basurero ilegal, quema, falta de paso del camión o poda en vía pública.</p>
+        </div>
+
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 relative">
+          <div class="text-amber-400 font-mono text-xs font-bold mb-2">PASO 02</div>
+          <h3 class="text-sm font-bold text-white mb-1">Adjuntar Evidencia</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Sube fotografías o descripción detallada de la ubicación exacta en tu sector de San Pedro Sula.</p>
+        </div>
+
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 relative">
+          <div class="text-amber-400 font-mono text-xs font-bold mb-2">PASO 03</div>
+          <h3 class="text-sm font-bold text-white mb-1">Elección de Identidad</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Puedes realizar tu reporte de forma <strong>Completamente Anónima</strong> o registrado para notificaciones.</p>
+        </div>
+
+        <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 relative">
+          <div class="text-amber-400 font-mono text-xs font-bold mb-2">PASO 04</div>
+          <h3 class="text-sm font-bold text-white mb-1">Código de Seguimiento</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">Recibe un número de expediente correlativo para fiscalizar la respuesta municipal en tiempo real.</p>
+        </div>
+      </div>
+
+      <!-- Live Recent Complaints Board (Public Audit Feed) -->
+      <div class="glass-card rounded-3xl p-6 border border-slate-800">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Tablero de Denuncias Recientes (Auditoría Pública)</h3>
+          </div>
+          <span class="text-[11px] text-slate-400 font-mono">Actualizado continuamente</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950/80 text-slate-400 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Código / Expediente</th>
+                <th class="py-3 px-4">Sector / Colonia</th>
+                <th class="py-3 px-4">Tipo de Incidencia</th>
+                <th class="py-3 px-4">Estado Actual</th>
+                <th class="py-3 px-4">Tiempo Estimado</th>
+                <th class="py-3 px-4 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono">
+              <tr class="hover:bg-slate-900/50 transition">
+                <td class="py-3 px-4 font-bold text-brand-400">SPS-2026-8842</td>
+                <td class="py-3 px-4 text-slate-200">Barrio Guamilito, 7 C. NW</td>
+                <td class="py-3 px-4">Basurero Clandestino</td>
+                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] border border-emerald-500/30">En Cuadrilla</span></td>
+                <td class="py-3 px-4 font-sans text-slate-400">~ 2 Horas</td>
+                <td class="py-3 px-4 text-right font-sans">
+                  <button onclick="viewTicketDetail('SPS-2026-8842')" class="text-amber-400 hover:underline">Ver Estado</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-900/50 transition">
+                <td class="py-3 px-4 font-bold text-brand-400">SPS-2026-8841</td>
+                <td class="py-3 px-4 text-slate-200">Colonia Satélite, V Etapa</td>
+                <td class="py-3 px-4">Quema Indebida de Desechos</td>
+                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] border border-amber-500/30">Inspección Policía Municipal</span></td>
+                <td class="py-3 px-4 font-sans text-slate-400">En Curso</td>
+                <td class="py-3 px-4 text-right font-sans">
+                  <button onclick="viewTicketDetail('SPS-2026-8841')" class="text-amber-400 hover:underline">Ver Estado</button>
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-900/50 transition">
+                <td class="py-3 px-4 font-bold text-brand-400">SPS-2026-8839</td>
+                <td class="py-3 px-4 text-slate-200">Sector Rivera Hernández</td>
+                <td class="py-3 px-4">Retraso en Camión Recolector</td>
+                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] border border-cyan-500/30">Ruta Despachada</span></td>
+                <td class="py-3 px-4 font-sans text-slate-400">Completado Hoy</td>
+                <td class="py-3 px-4 text-right font-sans">
+                  <button onclick="viewTicketDetail('SPS-2026-8839')" class="text-amber-400 hover:underline">Ver Estado</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Civic Education & Municipal Regulations -->
+  <section id="normativa" class="py-16 border-t border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+          Guía Ciudadana y Reglamento Ambiental SPS
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2">
+          Conoce las obligaciones de los habitantes de San Pedro Sula y las sanciones estipuladas para mantener limpia la ciudad.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-hand-holding-hand"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Disposición en Aceras</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Saca los contenedores o bolsas bien selladas únicamente 2 horas antes del horario programado para evitar la dispersión por animales.
+          </p>
+          <span class="text-[11px] text-amber-400 font-semibold">Art. 42 Plan de Arbitrios</span>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-ban"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Prohibición de Quema</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Queda estrictamente prohibida la quema de basura, llantas o vegetación en solares baldíos. Multas aplicables desde L 2,000.
+          </p>
+          <span class="text-[11px] text-rose-400 font-semibold">Sanción de Policía Municipal</span>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-3xl p-6 border border-slate-800">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-dumpster-fire"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Escombros y Podas</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Desechos de construcción o ramas de gran tamaño requieren solicitar un contenedor volquete especial sin obstruir la vía pública.
+          </p>
+          <span class="text-[11px] text-cyan-400 font-semibold">Servicios Especiales 100</span>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Public Transparency & Impact Metrics -->
+  <section id="transparencia" class="py-16 bg-slate-900/50 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="glass-card rounded-3xl p-8 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wide mb-2">
+            <i class="fa-solid fa-chart-line"></i> Datos Abiertos y Rendición de Cuentas 2026
+          </div>
+          <h2 class="text-2xl font-extrabold text-white">Impacto Operativo en San Pedro Sula</h2>
+        </div>
+
+        <div class="max-w-xl mx-auto text-center">
+          <h4 class="font-bold text-white mb-2 uppercase tracking-wider text-[11px]">Plataformas Externas de Flota y Control</h4>
+          <p class="text-[11px] text-slate-400 mb-4">Sistemas especializados para operadores y monitoreo vehicular en tiempo real.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a 
+              href="https://rutas.cleancity.sps.hn" 
+              target="_blank"
+              class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 py-2.5 px-4 rounded-xl text-slate-200 font-semibold transition flex items-center justify-center gap-2 text-xs"
+            >
+              <i class="fa-solid fa-map-location-dot text-brand-400"></i> Portal de Rutas GPS
+            </a>
+            <a 
+              href="pages/admin/login.html"
+              class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 py-2.5 px-4 rounded-xl text-slate-200 font-semibold transition flex items-center justify-center gap-2 text-xs"
+            >
+              <i class="fa-solid fa-user-shield text-amber-400"></i> Portal de Administración
+            </a>
+          </div>
+        </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-800 text-xs text-slate-400 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        
+        <div class="space-y-3">
+          <div class="text-lg font-bold text-white flex items-center gap-2">
+            <span>♻️</span> CleanCity <span class="text-brand-400">SPS</span>
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Portal Oficial de Participación Ciudadana, Monitoreo Operativo y Denuncia Ambiental de la Ciudad de San Pedro Sula, Honduras.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-3 uppercase tracking-wider text-[11px]">Canales Institucionales</h4>
+          <ul class="space-y-2 text-slate-400">
+            <li><a href="#denuncia-portal" class="hover:text-brand-400">Portal de Denuncia Ciudadana</a></li>
+            <li><a href="#cobertura" class="hover:text-brand-400">Mapa de Sectores y Cobertura</a></li>
+            <li><a href="#horarios" class="hover:text-brand-400">Calendario de Recolección</a></li>
+            <li><a href="#transparencia" class="hover:text-brand-400">Portal de Transparencia Municipal</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-3 uppercase tracking-wider text-[11px]">Líneas Directas SPS</h4>
+          <ul class="space-y-2 text-slate-400">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-phone text-amber-400"></i> Call Center Municipal: 100</li>
+            <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Asistente WhatsApp: +504 9999-0000</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-envelope text-cyan-400"></i> denuncias@cleancity.sps.hn</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-white mb-3 uppercase tracking-wider text-[11px]">Acceso al Sistema</h4>
+          <p class="text-[11px] text-slate-400 mb-3">Módulo restringido para cuadrillas y supervisores de la flota municipal.</p>
+          <button onclick="openAuthModal('empresa')" class="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 py-2.5 rounded-xl text-white font-semibold transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-shield text-brand-400"></i> Portal de Operadores
+          </button>
+        </div>
+
+      </div>
+
+      <div class="border-t border-slate-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px]">
+        <div>© 2026 Municipalidad de San Pedro Sula • Todos los derechos reservados. Desarrollado para la Capital Industrial.</div>
+        <div class="flex gap-4 text-slate-500">
+          <a href="#" class="hover:text-slate-300">Términos Legales</a>
+          <a href="#" class="hover:text-slate-300">Política de Privacidad</a>
+          <a href="#" class="hover:text-slate-300">Portal TSC Honduras</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- MODAL 2: CONSULTA Y RASTREO DE TICKET / EXPEDIENTE -->
+  <div id="trackingModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 relative border border-slate-700 shadow-2xl">
+      
+      <button onclick="closeTrackingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-800">
+        <div class="w-11 h-11 rounded-2xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-magnifying-glass-location"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Consulta de Expediente de Denuncia</h3>
+          <p class="text-xs text-slate-400">Verifica el avance de la atención de tu reporte</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="flex gap-2">
+          <input type="text" id="trackInputCode" value="SPS-2026-8842" placeholder="SPS-2026-XXXX" class="flex-1 bg-slate-950 border border-slate-800 text-slate-100 rounded-xl p-2.5 outline-none focus:border-brand-500 font-mono text-sm uppercase" />
+  <!-- MODAL 3: REDIRECCIÓN / ACCESO A PLATAFORMAS EXTERNAS -->
+  <div id="authModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 relative border border-slate-700 shadow-2xl">
+      
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-2xl mx-auto mb-2">
+          <i class="fa-solid fa-up-right-from-square"></i>
+        </div>
+        <h3 class="text-xl font-bold text-white">Sistemas Externos SPS</h3>
+        <p class="text-xs text-slate-400 mt-1">Esta portada web es únicamente informativa y de denuncia pública. Para acceder a la administración o al mapa GPS, dirígete a nuestros sitios dedicados:</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <a 
+          href="https://rutas.cleancity.sps.hn" 
+          target="_blank"
+          class="w-full bg-slate-900 hover:bg-slate-800 border border-brand-500/40 p-3.5 rounded-xl text-white font-semibold transition flex items-center justify-between group"
+        >
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-route text-brand-400 text-base"></i>
+            <div class="text-left">
+              <div class="font-bold">Plataforma de Monitoreo GPS</div>
+              <div class="text-[10px] text-slate-400">Rutas e itinerarios en vivo</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+
+        <a 
+          href="https://admin.cleancity.sps.hn" 
+          target="_blank"
+          class="w-full bg-slate-900 hover:bg-slate-800 border border-amber-500/40 p-3.5 rounded-xl text-white font-semibold transition flex items-center justify-between group"
+        >
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-user-shield text-amber-400 text-base"></i>
+            <div class="text-left">
+              <div class="font-bold">Portal de Administración</div>
+              <div class="text-[10px] text-slate-400">Acceso exclusivo para operadores y municipalidad</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 3: AUTENTICACIÓN / ACCESO -->
+  <div id="authModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full rounded-3xl p-6 sm:p-8 relative border border-slate-700 shadow-2xl">
+      
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 border border-brand-500/30 flex items-center justify-center text-2xl mx-auto mb-2">
+          ♻️
+        </div>
+        <h3 class="text-xl font-bold text-white">Acceso al Sistema SPS</h3>
+        <p class="text-xs text-slate-400 mt-1">Portal de Operadores y Administradores</p>
+      </div>
+
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1" for="modalInputUser">Usuario o Correo Institucional</label>
+          <input type="text" id="modalInputUser" value="operador.flota@cleancity.sps.hn" class="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl p-3 outline-none focus:border-brand-500" required />
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1" for="modalInputPass">Contraseña</label>
+          <input type="password" id="modalInputPass" value="••••••••••••" class="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl p-3 outline-none focus:border-brand-500" required />
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-brand-600/30">
+          Ingresar al Panel de Control
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    let canvas, ctx;
+    let width = 0, height = 0;
+    let activeLayers = { traffic: true, reports: true };
+
+    const spsRoads = [
+      { points: [[0.1, 0.15], [0.5, 0.45], [0.9, 0.85]] },
+      { points: [[0.15, 0.85], [0.5, 0.25], [0.85, 0.5]] },
+      { points: [[0.1, 0.5], [0.9, 0.5]] },
+      { points: [[0.5, 0.1], [0.5, 0.9]] }
+    ];
+
+    let reports = [
+      { code: 'SPS-2026-8842', title: 'Basurero Clandestino', location: 'Barrio Guamilito 7 C.', x: 0.43, y: 0.35 },
+      { code: 'SPS-2026-8841', title: 'Quema Indebida', location: 'Colonia Satélite', x: 0.28, y: 0.72 }
+    ];
+
+    window.onload = function() {
+      initCanvas();
+    }
+
+    function searchTicketByCode() {
+      const code = document.getElementById('trackInputCode').value.trim().toUpperCase();
+      if (!code) return;
+      document.getElementById('resTicketCode').textContent = code;
+      showToast(`Mostrando expediente ${code}`);
+    }
+
+    function viewTicketDetail(code) {
+      document.getElementById('trackInputCode').value = code;
+      document.getElementById('resTicketCode').textContent = code;
+      openTrackingModal();
+    }
+
+    function handleHeroSearch(e) {
+      e.preventDefault();
+      const val = document.getElementById('heroSearchInput').value.trim();
+      if (val.toUpperCase().startsWith('SPS')) {
+        viewTicketDetail(val.toUpperCase());
+      } else if (val) {
+        document.getElementById('homeSectorSelect').value = 'Guamilito';
+        updateSectorSchedule('Guamilito');
+        document.getElementById('horarios').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-slate-800';
+      
+      toast.className = `${bgColor} border border-slate-700 text-white text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
