@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.log
+CLAUDE.md
+
+.agents/
+.claude/
+.claude-flow/
+.swarm/
+.env.example
